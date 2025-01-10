@@ -1,3 +1,10 @@
-.tiptap > :global(img.ProseMirror-selectednode) {
-  outline: 3px solid var(--primary);
+.tiptap > :global(.ProseMirror-selectednode) {
+  img {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .image-toolbar {
+    display: flex;
+  }
 }

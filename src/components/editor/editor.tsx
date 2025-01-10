@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import ColorExtension from "@tiptap/extension-color";
-import ImageExtension from "@tiptap/extension-image";
 import LinkExtension from "@tiptap/extension-link";
 import TextStyleExtension from "@tiptap/extension-text-style";
 import UnderlineExtension from "@tiptap/extension-underline";
@@ -12,6 +11,7 @@ import {
 } from "@tiptap/react";
 import StarterKitExtension from "@tiptap/starter-kit";
 import FontSizeExtension from "tiptap-extension-font-size";
+import { ImageExtension } from "../extensions/image";
 import styles from "./editor.module.css";
 import { Toolbar } from "./toolbar";
 
@@ -39,11 +39,7 @@ const extensions = [
       class: "text-[#3b82f6] underline",
     },
   }),
-  ImageExtension.configure({
-    HTMLAttributes: {
-      class: "cursor-pointer w-full",
-    },
-  }),
+  ImageExtension,
 ];
 
 export const initialEditorValue: EditorValue = {
