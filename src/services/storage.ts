@@ -1,8 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 export const storageApi = {
   uploadImage: async (file: File) => {
     await sleep(1000);
+
+    // throw new Error("mock failed");
+
     return {
       url: URL.createObjectURL(file),
     };
@@ -11,10 +14,8 @@ export const storageApi = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const useStorageImage = ({ file, id }: { file: File; id: string }) => {
-  return useQuery({
-    queryKey: ["storageImage", id],
-    queryFn: () => storageApi.uploadImage(file),
-    staleTime: Infinity,
+export const useUploadImage = () => {
+  return useMutation({
+    mutationFn: storageApi.uploadImage,
   });
 };

@@ -49,7 +49,7 @@ export const useToolbar = () => {
   const insertImage = (file: File) => {
     const id = nanoid();
 
-    editor.chain().focus().setImage({ file, id }).run();
+    editor.chain().focus().insertImage({ file, id }).run();
     editor.commands.enter();
     editor.commands.focus("end");
   };

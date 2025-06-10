@@ -130,7 +130,6 @@ const FontSize = () => {
 
   const isHeading1Active = currentFontSize === "32";
   const isHeading2Active = currentFontSize === "24";
-  console.log(currentFontSize);
   const isHeading3Active = currentFontSize === "20";
 
   return (

@@ -1,19 +1,23 @@
 import { cn } from "@/lib/utils";
-import { useStorageImage } from "@/services/storage";
+import { useUploadImage } from "@/services/storage";
 import { mergeAttributes, Node, NodeViewProps } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { Trash2Icon } from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import styles from "../editor/editor.module.css";
 import { IconButton } from "../ui/icon-button";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     image: {
-      setImage: (options: { file: File; id: string }) => ReturnType;
+      insertImage: (options: { file: File; id: string }) => ReturnType;
       removeImage: () => ReturnType;
     };
   }
 }
+
+const uploadedImage = new Map<string, string>();
 
 export const ImageExtension = Node.create({
   name: "image",
@@ -50,9 +54,6 @@ export const ImageExtension = Node.create({
       id: {
         default: null,
       },
-      title: {
-        default: null,
-      },
     };
   },
 
@@ -62,7 +63,7 @@ export const ImageExtension = Node.create({
 
   addCommands() {
     return {
-      setImage:
+      insertImage:
         (options) =>
         ({ commands }) => {
           return commands.insertContent({
@@ -96,24 +97,33 @@ type AsyncImageProps = {
 };
 
 const AsyncImage = ({ file, id, onDelete }: AsyncImageProps) => {
-  const { data, isPending, isError } = useStorageImage({
-    file: file,
-    id: id,
-  });
+  const initialUrl = uploadedImage.get(id) || null;
 
-  if (isPending) {
+  const [url, setUrl] = useState<string | null>(initialUrl);
+  const { mutate: uploadImage } = useUploadImage();
+
+  useEffect(() => {
+    if (url !== null) return;
+
+    uploadImage(file, {
+      onSuccess: (data) => {
+        setUrl(data.url);
+        uploadedImage.set(id, data.url);
+      },
+      onError: () => {
+        onDelete();
+        toast.error("이미지 업로드에 실패했습니다.");
+      },
+    });
+  }, [file, id, uploadImage, onDelete, url]);
+
+  if (!url) {
     return <div className="h-[320px] w-full bg-gray-200" />;
-  }
-
-  if (isError) {
-    onDelete();
-
-    return null;
   }
 
   return (
     <>
-      <img className="w-full" src={data.url} alt="" />
+      <img className="w-full" src={url} alt="" />
       <div className="mt-2 flex justify-center">
         <div className={cn("hidden", styles["image-toolbar"])}>
           <IconButton size="small" aria-label="이미지 삭제" variant="outlined" onClick={onDelete}>
