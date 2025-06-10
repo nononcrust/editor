@@ -12,7 +12,6 @@ import { useRef } from "react";
 import { IconButton } from "../ui/icon-button";
 import { Popover } from "../ui/popover";
 import { useToolbar } from "./use-toolbar";
-import { uploadImage } from "./utils";
 
 export const Toolbar = () => {
   return (
@@ -177,11 +176,9 @@ const ImageUpload = () => {
   const onFileChange: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
     const { files } = event.target;
 
-    if (!files || !imageInputRef.current) return;
+    if (!files || !files[0] || !imageInputRef.current) return;
 
-    const url = await uploadImage(files[0]);
-
-    insertImage(url);
+    insertImage(files[0]);
 
     imageInputRef.current.value = "";
   };

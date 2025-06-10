@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useStorageImage } from "@/services/storage";
 import { mergeAttributes, Node, NodeViewProps } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
 import { Trash2Icon } from "lucide-react";
@@ -8,7 +9,7 @@ import { IconButton } from "../ui/icon-button";
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     image: {
-      setImage: (options: { src: string; alt?: string; title?: string }) => ReturnType;
+      setImage: (options: { file: File; id: string }) => ReturnType;
       removeImage: () => ReturnType;
     };
   }
@@ -43,10 +44,10 @@ export const ImageExtension = Node.create({
 
   addAttributes() {
     return {
-      src: {
+      file: {
         default: null,
       },
-      alt: {
+      id: {
         default: null,
       },
       title: {
@@ -79,27 +80,47 @@ export const ImageExtension = Node.create({
 });
 
 const ImageComponent = ({ node, deleteNode }: NodeViewProps) => {
-  const { src, alt } = node.attrs;
-
-  const removeImage = () => {
-    deleteNode();
-  };
+  const { file, id } = node.attrs;
 
   return (
     <NodeViewWrapper>
-      <img className="w-full" src={src} alt={alt} />
+      <AsyncImage file={file} id={id} onDelete={deleteNode} />
+    </NodeViewWrapper>
+  );
+};
+
+type AsyncImageProps = {
+  file: File;
+  id: string;
+  onDelete: () => void;
+};
+
+const AsyncImage = ({ file, id, onDelete }: AsyncImageProps) => {
+  const { data, isPending, isError } = useStorageImage({
+    file: file,
+    id: id,
+  });
+
+  if (isPending) {
+    return <div className="h-[320px] w-full bg-gray-200" />;
+  }
+
+  if (isError) {
+    onDelete();
+
+    return null;
+  }
+
+  return (
+    <>
+      <img className="w-full" src={data.url} alt="" />
       <div className="mt-2 flex justify-center">
         <div className={cn("hidden", styles["image-toolbar"])}>
-          <IconButton
-            size="small"
-            aria-label="이미지 삭제"
-            variant="outlined"
-            onClick={removeImage}
-          >
+          <IconButton size="small" aria-label="이미지 삭제" variant="outlined" onClick={onDelete}>
             <Trash2Icon size={16} className="text-error" />
           </IconButton>
         </div>
       </div>
-    </NodeViewWrapper>
+    </>
   );
 };

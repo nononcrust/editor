@@ -1,4 +1,5 @@
 import { useCurrentEditor } from "@tiptap/react";
+import { nanoid } from "nanoid";
 
 const DEFAULT_TEXT_COLOR = "#000000";
 
@@ -45,8 +46,10 @@ export const useToolbar = () => {
     editor.commands.setLink({ href: url });
   };
 
-  const insertImage = (url: string) => {
-    editor.chain().focus().setImage({ src: url, alt: "게시글 삽입 이미지" }).run();
+  const insertImage = (file: File) => {
+    const id = nanoid();
+
+    editor.chain().focus().setImage({ file, id }).run();
     editor.commands.enter();
     editor.commands.focus("end");
   };
