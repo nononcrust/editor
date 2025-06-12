@@ -1,23 +1,21 @@
 import { cn } from "@/lib/utils";
-import { useUploadImage } from "@/services/storage";
-import { mergeAttributes, Node, NodeViewProps } from "@tiptap/core";
-import { NodeViewWrapper, ReactNodeViewRenderer } from "@tiptap/react";
+import { Editor, mergeAttributes, Node, NodeViewProps } from "@tiptap/core";
+import { NodeViewWrapper, ReactNodeViewRenderer, useCurrentEditor } from "@tiptap/react";
 import { Trash2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useEffect } from "react";
 import styles from "../editor/editor.module.css";
 import { IconButton } from "../ui/icon-button";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     image: {
-      insertImage: (options: { file: File; id: string }) => ReturnType;
+      insertImage: (options: { url: string | null; id: string }) => ReturnType;
       removeImage: () => ReturnType;
     };
   }
 }
 
-const uploadedImage = new Map<string, string>();
+export const uploadedImageMap = new Map<string, string>();
 
 export const ImageExtension = Node.create({
   name: "image",
@@ -48,7 +46,7 @@ export const ImageExtension = Node.create({
 
   addAttributes() {
     return {
-      file: {
+      url: {
         default: null,
       },
       id: {
@@ -81,49 +79,50 @@ export const ImageExtension = Node.create({
 });
 
 const ImageComponent = ({ node, deleteNode }: NodeViewProps) => {
-  const { file, id } = node.attrs;
+  const { url, id } = node.attrs;
 
   return (
     <NodeViewWrapper>
-      <AsyncImage file={file} id={id} onDelete={deleteNode} />
+      <AsyncImage url={url} id={id} onDelete={deleteNode} />
     </NodeViewWrapper>
   );
 };
 
 type AsyncImageProps = {
-  file: File;
+  url: string | null;
   id: string;
   onDelete: () => void;
 };
 
-const AsyncImage = ({ file, id, onDelete }: AsyncImageProps) => {
-  const initialUrl = uploadedImage.get(id) || null;
+const AsyncImage = ({ url, id, onDelete }: AsyncImageProps) => {
+  const { editor } = useCurrentEditor();
 
-  const [url, setUrl] = useState<string | null>(initialUrl);
-  const { mutate: uploadImage } = useUploadImage();
+  const cachedImageUrl = uploadedImageMap.get(id);
 
+  const imageSrc = cachedImageUrl || url;
+
+  // Redo로 인해 마운트되었을 때 이미지 캐시를 확인
   useEffect(() => {
-    if (url !== null) return;
+    if (url !== null || editor === null) return;
 
-    uploadImage(file, {
-      onSuccess: (data) => {
-        setUrl(data.url);
-        uploadedImage.set(id, data.url);
-      },
-      onError: () => {
-        onDelete();
-        toast.error("이미지 업로드에 실패했습니다.");
-      },
-    });
-  }, [file, id, uploadImage, onDelete, url]);
+    if (cachedImageUrl) {
+      setTimeout(() => {
+        updateImageNodeAttr({
+          editor,
+          id,
+          url: cachedImageUrl,
+        });
+      }, 0);
+    }
+  }, [id, url, editor, cachedImageUrl]);
 
-  if (!url) {
+  if (imageSrc === null) {
     return <div className="h-[320px] w-full bg-gray-200" />;
   }
 
   return (
     <>
-      <img className="w-full" src={url} alt="" />
+      <img className="w-full" src={imageSrc} alt="" />
       <div className="mt-2 flex justify-center">
         <div className={cn("hidden", styles["image-toolbar"])}>
           <IconButton size="small" aria-label="이미지 삭제" variant="outlined" onClick={onDelete}>
@@ -133,4 +132,28 @@ const AsyncImage = ({ file, id, onDelete }: AsyncImageProps) => {
       </div>
     </>
   );
+};
+
+export const updateImageNodeAttr = ({
+  editor,
+  url,
+  id,
+}: {
+  editor: Editor;
+  url: string;
+  id: string;
+}) => {
+  editor.state.doc.descendants((node, position) => {
+    const { tr } = editor.state;
+
+    if (node.type.name === "image" && node.attrs.id === id) {
+      tr.setMeta("addToHistory", false);
+      tr.setNodeMarkup(position, undefined, {
+        ...node.attrs,
+        url,
+      });
+
+      editor.view.dispatch(tr);
+    }
+  });
 };

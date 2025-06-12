@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 
 export const storageApi = {
   uploadImage: async (file: File) => {
-    await sleep(1000);
+    await sleep(3000);
 
     // throw new Error("mock failed");
 

@@ -1,5 +1,8 @@
+import { useUploadImage } from "@/services/storage";
 import { useCurrentEditor } from "@tiptap/react";
 import { nanoid } from "nanoid";
+import toast from "react-hot-toast";
+import { updateImageNodeAttr, uploadedImageMap } from "../extensions/image";
 
 const DEFAULT_TEXT_COLOR = "#000000";
 
@@ -46,12 +49,40 @@ export const useToolbar = () => {
     editor.commands.setLink({ href: url });
   };
 
+  const { mutate: uploadImage } = useUploadImage();
+
   const insertImage = (file: File) => {
     const id = nanoid();
 
-    editor.chain().focus().insertImage({ file, id }).run();
+    editor.chain().focus().insertImage({ url: null, id }).run();
+
     editor.commands.enter();
-    editor.commands.focus("end");
+
+    uploadImage(file, {
+      onSuccess: (data) => {
+        updateImageNodeAttr({
+          editor,
+          id,
+          url: data.url,
+        });
+
+        uploadedImageMap.set(id, data.url);
+      },
+      onError: () => {
+        const { state, dispatch } = editor.view;
+        const { tr } = state;
+
+        state.doc.descendants((node, pos) => {
+          if (node.type.name === "image" && node.attrs.id === id) {
+            tr.delete(pos, pos + node.nodeSize);
+          }
+        });
+
+        dispatch(tr);
+
+        toast.error("이미지를 업로드하지 못했어요.");
+      },
+    });
   };
 
   const selectionEmpty = editor.state.selection.empty;
