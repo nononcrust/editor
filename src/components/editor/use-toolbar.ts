@@ -1,3 +1,4 @@
+import { getImageSize } from "@/lib/utils";
 import { useUploadImage } from "@/services/storage";
 import { useCurrentEditor } from "@tiptap/react";
 import { nanoid } from "nanoid";
@@ -51,10 +52,14 @@ export const useToolbar = () => {
 
   const { mutate: uploadImage } = useUploadImage();
 
-  const insertImage = (file: File) => {
+  const insertImage = async (file: File) => {
     const id = nanoid();
 
-    editor.chain().focus().insertImage({ url: null, id }).run();
+    const { width, height } = await getImageSize(file);
+
+    console.log(width, height);
+
+    editor.chain().focus().insertImage({ url: null, id, width, height }).run();
 
     editor.commands.enter();
 
