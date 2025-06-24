@@ -54,9 +54,7 @@ export const useToolbar = () => {
   const insertImage = (file: File) => {
     const id = nanoid();
 
-    editor.chain().focus().insertImage({ url: null, id }).run();
-
-    editor.commands.enter();
+    editor.chain().focus().insertImage({ url: null, id }).createParagraphNear().run();
 
     uploadImage(file, {
       onSuccess: (data) => {
