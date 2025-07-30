@@ -1,45 +1,30 @@
 import { cn } from "@/lib/utils";
 import ColorExtension from "@tiptap/extension-color";
-import LinkExtension from "@tiptap/extension-link";
-import TextStyleExtension from "@tiptap/extension-text-style";
-import UnderlineExtension from "@tiptap/extension-underline";
-import {
-  EditorContent,
-  EditorProvider,
-  JSONContent,
-  useEditor as useTiptapEditor,
-} from "@tiptap/react";
-import StarterKitExtension from "@tiptap/starter-kit";
-import FontSizeExtension from "tiptap-extension-font-size";
+import { TextStyleKit } from "@tiptap/extension-text-style";
+import { CharacterCount, Placeholder } from "@tiptap/extensions";
+import { EditorContent, JSONContent, useEditor, useEditor as useTiptapEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { useMemo } from "react";
 import { ImageExtension } from "../extensions/image";
-import styles from "./editor.module.css";
 import { Toolbar } from "./toolbar";
 
 export type EditorValue = JSONContent;
 
-type EditorProps = {
-  mode?: "edit" | "view";
-  className?: string;
-  value: EditorValue;
-  onChange: (value: EditorValue) => void;
-};
-
-const extensions = [
-  StarterKitExtension.configure({
+const defaultExtensions = [
+  StarterKit.configure({
     gapcursor: false,
-  }),
-  UnderlineExtension,
-  ColorExtension,
-  TextStyleExtension,
-  FontSizeExtension,
-  LinkExtension.configure({
-    autolink: false,
-    HTMLAttributes: {
-      target: "_blank",
-      class: "text-[#3b82f6] underline",
+    link: {
+      autolink: false,
+      HTMLAttributes: {
+        target: "_blank",
+        class: "text-[#3b82f6] underline cursor-pointer",
+      },
     },
   }),
+  ColorExtension,
+  TextStyleKit,
   ImageExtension,
+  CharacterCount,
 ];
 
 export const initialEditorValue: EditorValue = {
@@ -51,24 +36,47 @@ export const initialEditorValue: EditorValue = {
   ],
 };
 
-export const Editor = ({ mode = "edit", className, value, onChange }: EditorProps) => {
-  return (
-    <EditorProvider
-      extensions={extensions}
-      content={value}
-      onUpdate={({ editor }) => onChange(editor.getJSON())}
-      editorProps={{
-        attributes: {
-          class: cn("outline-none", styles["tiptap"], className),
-        },
-      }}
-      slotBefore={mode === "edit" && <Toolbar />}
-      immediatelyRender={false}
-    />
-  );
+type EditorProps = {
+  className?: string;
+  value: EditorValue;
+  onChange: (value: EditorValue) => void;
+  placeholder?: string;
 };
 
-const rendererExtensions = [...extensions];
+export const Editor = ({ className, value, onChange, placeholder = "" }: EditorProps) => {
+  const extensions = useMemo(
+    () => [
+      ...defaultExtensions,
+      Placeholder.configure({
+        placeholder,
+      }),
+    ],
+    [placeholder],
+  );
+
+  const editor = useEditor({
+    extensions,
+    content: value,
+    onUpdate: ({ editor }) => onChange(editor.getJSON()),
+    editorProps: {
+      attributes: {
+        class: cn("outline-none h-full", className),
+      },
+    },
+    immediatelyRender: false,
+  });
+
+  if (editor === null) {
+    return null;
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <Toolbar editor={editor} />
+      <EditorContent className="h-full" editor={editor} />
+    </div>
+  );
+};
 
 type RendererProps = {
   className?: string;
@@ -79,9 +87,9 @@ export const EditorRenderer = ({ className, value }: RendererProps) => {
   const editor = useTiptapEditor({
     editable: false,
     content: value,
-    extensions: rendererExtensions,
+    extensions: defaultExtensions,
     immediatelyRender: false,
   });
 
-  return <EditorContent className={cn("", className)} editor={editor}></EditorContent>;
+  return <EditorContent className={cn("", className)} editor={editor} />;
 };

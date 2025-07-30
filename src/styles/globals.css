@@ -78,3 +78,11 @@
     @apply focus-visible:ring-0;
   }
 }
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--placeholder);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

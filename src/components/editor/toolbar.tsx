@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Editor } from "@tiptap/react";
 import {
   BoldIcon,
   Heading1Icon,
@@ -6,60 +7,105 @@ import {
   Heading3Icon,
   ImageIcon,
   LinkIcon,
+  ListIcon,
+  ListOrderedIcon,
+  StrikethroughIcon,
   UnderlineIcon,
 } from "lucide-react";
 import { useRef } from "react";
 import { IconButton } from "../ui/icon-button";
 import { Popover } from "../ui/popover";
-import { useToolbar } from "./use-toolbar";
+import { ToolbarContextProvider, useToolbar } from "./use-toolbar";
 
-export const Toolbar = () => {
+const MAX_TEXT_LENGTH = 1000;
+const COLOR_PRESETS = ["#000000", "#3b82f6", "#34d399", "#f87171", "#fbbf24", "#818cf8"] as const;
+
+type ToolbarProps = {
+  editor: Editor;
+};
+
+export const Toolbar = ({ editor }: ToolbarProps) => {
   return (
-    <div className="flex w-full items-center justify-center gap-1 border-y py-2">
-      <Bold />
-      <Underline />
-      <Link />
-      <Color />
-      <FontSize />
-      <ImageUpload />
-    </div>
+    <ToolbarContextProvider editor={editor}>
+      <div className="relative flex w-full items-center justify-center gap-1 border-y py-2">
+        <Bold />
+        <Underline />
+        <Strikethrough />
+        <Link />
+        <Color />
+        <FontSize />
+        <ImageUpload />
+        <OrderedList />
+        <BulletList />
+        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center">
+          <CharacterCount />
+        </div>
+      </div>
+    </ToolbarContextProvider>
+  );
+};
+
+const CharacterCount = () => {
+  const { characterCount } = useToolbar();
+
+  return (
+    <span className="text-xs font-medium text-sub">
+      <span className={cn(characterCount > MAX_TEXT_LENGTH && "text-error")}>{characterCount}</span>
+      /{MAX_TEXT_LENGTH}
+    </span>
   );
 };
 
 const Bold = () => {
-  const { isBoldActive, toggleBold } = useToolbar();
+  const { isBold, toggleBold } = useToolbar();
 
   return (
     <IconButton
-      className={cn(isBoldActive && "text-primary")}
+      className={cn(isBold && "text-primary")}
       variant="ghost"
       size="small"
       aria-label="굵기"
       onClick={toggleBold}
     >
-      <BoldIcon size={16} strokeWidth={isBoldActive ? 3 : 2} />
+      <BoldIcon size={16} strokeWidth={isBold ? 3 : 2} />
     </IconButton>
   );
 };
 
 const Underline = () => {
-  const { isUnderlineActive, toggleUnderline } = useToolbar();
+  const { isUnderline, toggleUnderline } = useToolbar();
 
   return (
     <IconButton
-      className={cn(isUnderlineActive && "text-primary")}
+      className={cn(isUnderline && "text-primary")}
       variant="ghost"
       size="small"
       aria-label="굵기"
       onClick={toggleUnderline}
     >
-      <UnderlineIcon size={16} strokeWidth={isUnderlineActive ? 3 : 2} />
+      <UnderlineIcon size={16} strokeWidth={isUnderline ? 3 : 2} />
+    </IconButton>
+  );
+};
+
+const Strikethrough = () => {
+  const { isStrikethrough, toggleStrikethrough } = useToolbar();
+
+  return (
+    <IconButton
+      className={cn(isStrikethrough && "text-primary")}
+      variant="ghost"
+      size="small"
+      aria-label="취소선"
+      onClick={toggleStrikethrough}
+    >
+      <StrikethroughIcon size={16} strokeWidth={isStrikethrough ? 3 : 2} />
     </IconButton>
   );
 };
 
 const Link = () => {
-  const { insertLink } = useToolbar();
+  const { isLink, insertLink } = useToolbar();
 
   const onLinkInsertButtonClick = () => {
     const url = window.prompt("URL을 입력하세요");
@@ -75,6 +121,7 @@ const Link = () => {
 
   return (
     <IconButton
+      className={cn(isLink && "text-primary")}
       size="small"
       variant="ghost"
       aria-label="링크 삽입"
@@ -109,8 +156,12 @@ const Color = () => {
           />
         </IconButton>
       </Popover.Trigger>
-      <Popover.Content className="flex gap-2 p-2">
-        {["#000000", "#3b82f6", "#34d399", "#f87171", "#fbbf24", "#818cf8"].map((color) => (
+      <Popover.Content
+        className="flex gap-2 p-2"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        {COLOR_PRESETS.map((color) => (
           <Popover.Close
             key={color}
             className="size-3.5 cursor-pointer rounded-[3px]"
@@ -126,11 +177,11 @@ const Color = () => {
 };
 
 const FontSize = () => {
-  const { currentFontSize, toggleFontSize } = useToolbar();
+  const { fontSize, toggleFontSize } = useToolbar();
 
-  const isHeading1Active = currentFontSize === "32";
-  const isHeading2Active = currentFontSize === "24";
-  const isHeading3Active = currentFontSize === "20";
+  const isHeading1Active = fontSize === "32pt";
+  const isHeading2Active = fontSize === "24pt";
+  const isHeading3Active = fontSize === "20pt";
 
   return (
     <>
@@ -200,5 +251,37 @@ const ImageUpload = () => {
         accept={ALLOWED_IMAGE_TYPES}
       />
     </>
+  );
+};
+
+const OrderedList = () => {
+  const { toggleOrderedList, isOrderedList } = useToolbar();
+
+  return (
+    <IconButton
+      className={cn(isOrderedList && "text-primary")}
+      variant="ghost"
+      size="small"
+      aria-label="순서 목록"
+      onClick={toggleOrderedList}
+    >
+      <ListOrderedIcon size={16} strokeWidth={isOrderedList ? 3 : 2} />
+    </IconButton>
+  );
+};
+
+const BulletList = () => {
+  const { toggleBulletList, isBulletList } = useToolbar();
+
+  return (
+    <IconButton
+      className={cn(isBulletList && "text-primary")}
+      variant="ghost"
+      size="small"
+      aria-label="글머리 기호 목록"
+      onClick={toggleBulletList}
+    >
+      <ListIcon size={16} strokeWidth={isBulletList ? 3 : 2} />
+    </IconButton>
   );
 };

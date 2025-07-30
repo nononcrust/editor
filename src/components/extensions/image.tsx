@@ -122,7 +122,7 @@ const AsyncImage = ({ url, id, onDelete }: AsyncImageProps) => {
 
   return (
     <>
-      <img className="w-full" src={imageSrc} alt="" />
+      <img className="w-full select-none" src={imageSrc} alt="" />
       <div className="mt-2 flex justify-center">
         <div className={cn("hidden", styles["image-toolbar"])}>
           <IconButton size="small" aria-label="이미지 삭제" variant="outlined" onClick={onDelete}>
