@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import ColorExtension from "@tiptap/extension-color";
 import { TextStyleKit } from "@tiptap/extension-text-style";
 import { CharacterCount, Placeholder } from "@tiptap/extensions";
 import { EditorContent, JSONContent, useEditor, useEditor as useTiptapEditor } from "@tiptap/react";
@@ -21,7 +20,6 @@ const defaultExtensions = [
       },
     },
   }),
-  ColorExtension,
   TextStyleKit,
   ImageExtension,
   CharacterCount,
@@ -60,7 +58,7 @@ export const Editor = ({ className, value, onChange, placeholder = "" }: EditorP
     onUpdate: ({ editor }) => onChange(editor.getJSON()),
     editorProps: {
       attributes: {
-        class: cn("outline-none h-full", className),
+        class: cn("outline-none flex-1", className),
       },
     },
     immediatelyRender: false,
@@ -71,9 +69,9 @@ export const Editor = ({ className, value, onChange, placeholder = "" }: EditorP
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-1 flex-col">
       <Toolbar editor={editor} />
-      <EditorContent className="h-full" editor={editor} />
+      <EditorContent className="flex flex-1" editor={editor} />
     </div>
   );
 };
