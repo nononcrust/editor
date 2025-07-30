@@ -27,7 +27,7 @@ type ToolbarProps = {
 export const Toolbar = ({ editor }: ToolbarProps) => {
   return (
     <ToolbarContextProvider editor={editor}>
-      <div className="border-border relative flex w-full items-center justify-center gap-1 border-y py-2">
+      <div className="border-border relative flex h-12 w-full items-center justify-center gap-1 border-y">
         <Bold />
         <Underline />
         <Strikethrough />
