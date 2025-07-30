@@ -1,37 +1,55 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import * as PopoverPrimitives from "@radix-ui/react-popover";
-import React from "react";
+import { Popover as PopoverBase } from "@base-ui-components/react/popover";
+import { cn } from "../../lib/utils";
 
-type PopoverProps = React.ComponentPropsWithRef<typeof PopoverPrimitives.Root>;
+type PopoverProps = PopoverBase.Root.Props;
 
-export const Popover = ({ children, ...props }: PopoverProps) => {
-  return <PopoverPrimitives.Root {...props}>{children}</PopoverPrimitives.Root>;
+const Popover = ({ children, ...props }: PopoverProps) => {
+  return <PopoverBase.Root {...props}>{children}</PopoverBase.Root>;
 };
 
-type PopoverContentProps = React.ComponentPropsWithRef<typeof PopoverPrimitives.Content>;
+type PopoverContentProps = PopoverBase.Popup.Props & {
+  side?: PopoverBase.Positioner.Props["side"];
+};
 
-const PopoverContent = ({ className, children, sideOffset = 4, ...props }: PopoverContentProps) => {
+const PopoverContent = ({
+  className,
+  children,
+  side = "bottom",
+  ...props
+}: PopoverContentProps) => {
   return (
-    <PopoverPrimitives.Portal>
-      <PopoverPrimitives.Content
-        sideOffset={sideOffset}
-        className={cn(
-          "relative z-50 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-[8px] border border-border bg-background text-main shadow-lg outline-none",
-          "max-h-[calc(var(--radix-popover-content-available-height)-8px)]",
-          "animate-in fade-in-0",
-          "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </PopoverPrimitives.Content>
-    </PopoverPrimitives.Portal>
+    <PopoverBase.Portal>
+      <PopoverBase.Positioner sideOffset={4} side={side}>
+        <PopoverBase.Popup
+          className={cn(
+            "border-border bg-background text-main outline-hidden relative z-50 min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-lg border shadow-lg",
+            "max-h-[calc(var(--available-height)-0.5rem)]",
+            "data-starting-style:opacity-0 data-open:duration-150",
+            "data-[side=top]:data-starting-style:translate-y-[0.5rem]",
+            "data-[side=bottom]:data-starting-style:translate-y-[-0.5rem]",
+            "data-[side=left]:data-starting-style:translate-x-[0.5rem]",
+            "data-[side=right]:data-starting-style:translate-x-[-0.5rem]",
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </PopoverBase.Popup>
+      </PopoverBase.Positioner>
+    </PopoverBase.Portal>
   );
 };
 
-Popover.Trigger = PopoverPrimitives.Trigger;
+type PopoverTriggerProps = PopoverBase.Trigger.Props;
+
+const PopoverTrigger = ({ children, ...props }: PopoverTriggerProps) => {
+  return <PopoverBase.Trigger {...props}>{children}</PopoverBase.Trigger>;
+};
+
+Popover.Trigger = PopoverTrigger;
 Popover.Content = PopoverContent;
-Popover.Close = PopoverPrimitives.Close;
+Popover.Close = PopoverBase.Close;
+
+export { Popover };

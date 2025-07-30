@@ -1,107 +1,130 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import * as DropdownMenuPrimitives from "@radix-ui/react-dropdown-menu";
+import { Menu as DropdownMenuBase } from "@base-ui-components/react/menu";
+import { CheckIcon } from "lucide-react";
+import { tv, VariantProps } from "tailwind-variants";
+import { cn } from "../../lib/utils";
+import { checkboxVariants } from "./checkbox";
 
-type DropdownMenuProps = React.ComponentPropsWithRef<typeof DropdownMenuPrimitives.Root>;
+type DropdownMenuProps = DropdownMenuBase.Root.Props;
 
-export const DropdownMenu = ({ children, ...props }: DropdownMenuProps) => {
-  return <DropdownMenuPrimitives.Root {...props}>{children}</DropdownMenuPrimitives.Root>;
+const DropdownMenu = ({ children, ...props }: DropdownMenuProps) => {
+  return <DropdownMenuBase.Root {...props}>{children}</DropdownMenuBase.Root>;
 };
 
-type DropdownMenuContentProps = React.ComponentPropsWithRef<typeof DropdownMenuPrimitives.Content>;
+type DropdownMenuContentProps = DropdownMenuBase.Popup.Props;
 
-const DropdownMenuContent = ({
-  className,
-  sideOffset = 4,
-  children,
-  ...props
-}: DropdownMenuContentProps) => {
+const DropdownMenuContent = ({ className, children, ...props }: DropdownMenuContentProps) => {
   return (
-    <DropdownMenuPrimitives.Portal>
-      <DropdownMenuPrimitives.Content
-        className={cn(
-          "border-border text-main z-50 min-w-40 overflow-hidden rounded-[8px] border bg-background p-1 shadow-lg",
-          "animate-in fade-in-0",
-          "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-          className,
-        )}
-        sideOffset={sideOffset}
-        {...props}
-      >
-        {children}
-      </DropdownMenuPrimitives.Content>
-    </DropdownMenuPrimitives.Portal>
+    <DropdownMenuBase.Portal>
+      <DropdownMenuBase.Backdrop />
+      <DropdownMenuBase.Positioner className="outline-hidden" sideOffset={4} side="bottom">
+        <DropdownMenuBase.Popup
+          className={cn(
+            "border-border bg-background text-main z-50 min-w-40 rounded-md border py-1 shadow-lg outline-hidden",
+            "data-open:duration-150 data-starting-style:opacity-0",
+            "data-[side=top]:data-starting-style:translate-y-[0.5rem]",
+            "data-[side=bottom]:data-starting-style:translate-y-[-0.5rem]",
+            "data-[side=left]:data-starting-style:translate-x-[0.5rem]",
+            "data-[side=right]:data-starting-style:translate-x-[-0.5rem]",
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </DropdownMenuBase.Popup>
+      </DropdownMenuBase.Positioner>
+    </DropdownMenuBase.Portal>
   );
 };
 
-type DropdownMenuItemProps = React.ComponentPropsWithRef<typeof DropdownMenuPrimitives.Item>;
+const dropdownMenuItemVariants = tv({
+  base: cn(
+    "outline-hidden relative flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-sm font-medium",
+    "focus:bg-background-hover",
+    "data-disabled:pointer-events-none data-disabled:opacity-50",
+    "[&_svg]:shrink-0",
+  ),
+  variants: {
+    variant: {
+      default: "text-main",
+      danger: "text-error",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
-const DropdownMenuItem = ({ className, children, ...props }: DropdownMenuItemProps) => {
+type DropdownMenuItemProps = DropdownMenuBase.Item.Props &
+  VariantProps<typeof dropdownMenuItemVariants>;
+
+const DropdownMenuItem = ({ className, children, variant, ...props }: DropdownMenuItemProps) => {
   return (
-    <DropdownMenuPrimitives.Item
-      className={cn(
-        "text-main relative flex cursor-pointer select-none items-center gap-2 rounded-[6px] px-2 py-1.5 text-sm font-medium outline-none",
-        "focus:bg-background-hover",
-        "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-        "[&_svg]:shrink-0",
-        className,
-      )}
+    <DropdownMenuBase.Item
+      className={cn(dropdownMenuItemVariants({ variant }), className)}
       {...props}
     >
       {children}
-    </DropdownMenuPrimitives.Item>
+    </DropdownMenuBase.Item>
   );
 };
 
-type DropdownMenuLabelProps = React.ComponentPropsWithRef<typeof DropdownMenuPrimitives.Label>;
+type DropdownMenuGroupLabelProps = DropdownMenuBase.GroupLabel.Props;
 
-const DropdownMenuLabel = ({ className, children, ...props }: DropdownMenuLabelProps) => {
+const DropdownMenuGroupLabel = ({ className, children, ...props }: DropdownMenuGroupLabelProps) => {
   return (
-    <DropdownMenuPrimitives.Label
-      className={cn("text-subtle px-2 py-1.5 text-xs font-medium", className)}
+    <DropdownMenuBase.GroupLabel
+      className={cn("text-subtle px-3 py-1.5 text-xs font-medium", className)}
       {...props}
     >
       {children}
-    </DropdownMenuPrimitives.Label>
+    </DropdownMenuBase.GroupLabel>
   );
 };
 
-type DropdownMenuSeparatorProps = React.ComponentPropsWithRef<
-  typeof DropdownMenuPrimitives.Separator
->;
+type DropdownMenuSeparatorProps = DropdownMenuBase.Separator.Props;
 
 const DropdownMenuSeparator = ({ className, ...props }: DropdownMenuSeparatorProps) => {
   return (
-    <DropdownMenuPrimitives.Separator
-      className={cn("bg-border -mx-1 my-1 h-px", className)}
-      {...props}
-    />
+    <DropdownMenuBase.Separator className={cn("bg-border -mx-1 my-1 h-px", className)} {...props} />
   );
 };
 
-const DropdownMenuShortcut = ({
+type DropdownMenuCheckboxItemProps = DropdownMenuBase.CheckboxItem.Props;
+
+const DropdownMenuCheckboxItem = ({
   className,
   children,
   ...props
-}: React.ComponentPropsWithRef<"span">) => {
+}: DropdownMenuCheckboxItemProps) => {
   return (
-    <span
-      className={cn(
-        "border-border text-sub -me-1 ms-auto inline-flex h-5 max-h-full items-center rounded-[4px] border bg-background px-1 text-[10px] font-medium",
-        className,
-      )}
+    <DropdownMenuBase.CheckboxItem
+      className={cn(dropdownMenuItemVariants({ variant: "default" }), className)}
       {...props}
     >
       {children}
-    </span>
+      <DropdownMenuBase.CheckboxItemIndicator
+        keepMounted
+        className={cn(
+          "group ml-3 flex items-center justify-center",
+          checkboxVariants({ size: "medium" }).root(),
+        )}
+      >
+        <CheckIcon
+          className={cn("group-data-unchecked:hidden", checkboxVariants({ size: "medium" }).icon())}
+        />
+      </DropdownMenuBase.CheckboxItemIndicator>
+    </DropdownMenuBase.CheckboxItem>
   );
 };
 
-DropdownMenu.Trigger = DropdownMenuPrimitives.Trigger;
-DropdownMenu.Group = DropdownMenuPrimitives.Group;
+DropdownMenu.Trigger = DropdownMenuBase.Trigger;
+DropdownMenu.Group = DropdownMenuBase.Group;
 DropdownMenu.Content = DropdownMenuContent;
 DropdownMenu.Item = DropdownMenuItem;
-DropdownMenu.Label = DropdownMenuLabel;
+DropdownMenu.GroupLabel = DropdownMenuGroupLabel;
 DropdownMenu.Separator = DropdownMenuSeparator;
-DropdownMenu.Shortcut = DropdownMenuShortcut;
+DropdownMenu.CheckboxItem = DropdownMenuCheckboxItem;
+
+export { DropdownMenu };

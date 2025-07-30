@@ -1,3 +1,5 @@
+import { IconButton } from "@/components/ui/icon-button";
+import { Popover } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Editor } from "@tiptap/react";
 import {
@@ -13,8 +15,6 @@ import {
   UnderlineIcon,
 } from "lucide-react";
 import { useRef } from "react";
-import { IconButton } from "../../../components/ui/icon-button";
-import { Popover } from "../../../components/ui/popover";
 import { ToolbarContextProvider, useToolbar } from "../hooks/use-toolbar";
 
 const MAX_TEXT_LENGTH = 1000;
@@ -27,7 +27,7 @@ type ToolbarProps = {
 export const Toolbar = ({ editor }: ToolbarProps) => {
   return (
     <ToolbarContextProvider editor={editor}>
-      <div className="relative flex w-full items-center justify-center gap-1 border-y py-2">
+      <div className="border-border relative flex w-full items-center justify-center gap-1 border-y py-2">
         <Bold />
         <Underline />
         <Strikethrough />
@@ -37,7 +37,7 @@ export const Toolbar = ({ editor }: ToolbarProps) => {
         <ImageUpload />
         <OrderedList />
         <BulletList />
-        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center">
+        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
           <CharacterCount />
         </div>
       </div>
@@ -49,7 +49,7 @@ const CharacterCount = () => {
   const { characterCount } = useToolbar();
 
   return (
-    <span className="text-xs font-medium text-sub">
+    <span className="text-sub text-xs font-medium">
       <span className={cn(characterCount > MAX_TEXT_LENGTH && "text-error")}>{characterCount}</span>
       /{MAX_TEXT_LENGTH}
     </span>
@@ -146,21 +146,19 @@ const Color = () => {
 
   return (
     <Popover>
-      <Popover.Trigger asChild>
-        <IconButton aria-label="색상" size="small" variant="ghost">
-          <div
-            className="size-3.5 rounded-[3px]"
-            style={{
-              backgroundColor: currentColor,
-            }}
-          />
-        </IconButton>
-      </Popover.Trigger>
-      <Popover.Content
-        className="flex gap-2 p-2"
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        onOpenAutoFocus={(e) => e.preventDefault()}
-      >
+      <Popover.Trigger
+        render={
+          <IconButton aria-label="색상" size="small" variant="ghost">
+            <div
+              className="size-3.5 rounded-[3px]"
+              style={{
+                backgroundColor: currentColor,
+              }}
+            />
+          </IconButton>
+        }
+      />
+      <Popover.Content className="flex gap-2 p-2">
         {COLOR_PRESETS.map((color) => (
           <Popover.Close
             key={color}

@@ -1,61 +1,51 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import * as TooltipPrimitives from "@radix-ui/react-tooltip";
-import { cva, VariantProps } from "class-variance-authority";
+import { Tooltip as TooltipBase } from "@base-ui-components/react";
+import { tv, VariantProps } from "tailwind-variants";
+import { cn } from "../../lib/utils";
+
+const tooltipVariants = tv({
+  base: cn(
+    "relative z-50 rounded-[0.5rem] text-xs px-[0.625rem] py-[0.375rem] font-semibold",
+    "data-starting-style:opacity-0 data-open:duration-150",
+    "data-[side=top]:data-starting-style:translate-y-[0.5rem]",
+    "data-[side=bottom]:data-starting-style:translate-y-[-0.5rem]",
+    "data-[side=left]:data-starting-style:translate-x-[0.5rem]",
+    "data-[side=right]:data-starting-style:translate-x-[-0.5rem]",
+  ),
+  variants: {
+    variant: {
+      default: "bg-neutral text-background",
+      outlined: "border border-border bg-background shadow-xs text-main",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 type TooltipProps = VariantProps<typeof tooltipVariants> & {
   className?: string;
-  side?: TooltipPrimitives.TooltipContentProps["side"];
+  side?: TooltipBase.Positioner.Props["side"];
   content: React.ReactNode;
-  children: React.ReactNode;
-  delayDuration?: number;
+  children: TooltipBase.Trigger.Props["render"];
 };
 
-const tooltipVariants = cva(
-  cn(
-    "relative z-50 rounded-[8px] text-xs px-[10px] py-[6px] font-semibold",
-    "animate-in fade-in-0 zoom-in-95",
-    "data-[side=top]:slide-in-from-bottom-2",
-    "data-[side=bottom]:slide-in-from-top-2",
-    "data-[side=left]:slide-in-from-right-2",
-    "data-[side=right]:slide-in-from-left-2",
-  ),
-  {
-    variants: {
-      variant: {
-        default: "bg-black text-white",
-        outlined: "border border-border bg-background shadow-sm text-main",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
-export const Tooltip = ({
-  className,
-  variant,
-  content,
-  side = "top",
-  delayDuration = 0,
-  children,
-}: TooltipProps) => {
+const Tooltip = ({ className, variant, content, side = "top", children }: TooltipProps) => {
   return (
-    <TooltipPrimitives.Provider delayDuration={delayDuration}>
-      <TooltipPrimitives.Root>
-        <TooltipPrimitives.Trigger asChild>{children}</TooltipPrimitives.Trigger>
-        <TooltipPrimitives.Portal>
-          <TooltipPrimitives.Content
-            side={side}
-            sideOffset={4}
-            className={cn(tooltipVariants({ variant, className }))}
-          >
-            {content}
-          </TooltipPrimitives.Content>
-        </TooltipPrimitives.Portal>
-      </TooltipPrimitives.Root>
-    </TooltipPrimitives.Provider>
+    <TooltipBase.Provider delay={0}>
+      <TooltipBase.Root>
+        <TooltipBase.Trigger render={children} />
+        <TooltipBase.Portal>
+          <TooltipBase.Positioner side={side} sideOffset={4}>
+            <TooltipBase.Popup className={cn(tooltipVariants({ variant, className }))}>
+              {content}
+            </TooltipBase.Popup>
+          </TooltipBase.Positioner>
+        </TooltipBase.Portal>
+      </TooltipBase.Root>
+    </TooltipBase.Provider>
   );
 };
+
+export { Tooltip };

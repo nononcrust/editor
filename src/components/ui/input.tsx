@@ -1,19 +1,23 @@
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 type InputProps = React.ComponentPropsWithRef<"input">;
 
-export const Input = ({ className, ["aria-invalid"]: ariaInvalid, ...props }: InputProps) => {
+const Input = ({ className, "aria-invalid": ariaInvalid, ...props }: InputProps) => {
   return (
     <input
       className={cn(
-        "flex h-9 w-full rounded-[8px] border border-border bg-background px-3 text-sm text-main shadow-sm",
+        "border-border bg-background text-main shadow-xs flex h-10 w-full rounded-md border px-3 text-sm",
         "focus-visible:focus-input-ring",
         "placeholder-placeholder",
-        "disabled:pointer-events-none disabled:opacity-50",
+        "disabled:bg-background-100 disabled:pointer-events-none disabled:opacity-50",
+        "read-only:bg-background-100",
         ariaInvalid && "focus-visible:focus-input-ring-error border-error",
         className,
       )}
+      aria-invalid={ariaInvalid}
       {...props}
     />
   );
 };
+
+export { Input };
