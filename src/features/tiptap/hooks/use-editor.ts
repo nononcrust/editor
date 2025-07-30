@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EditorValue, initialEditorValue } from "./editor";
+import { EditorValue, initialEditorValue } from "../components/editor";
 
 export const useEditor = (initialValue = initialEditorValue) => {
   const [value, setValue] = useState<EditorValue>(initialValue);

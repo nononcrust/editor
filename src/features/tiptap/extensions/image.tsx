@@ -1,10 +1,10 @@
+import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { Editor, mergeAttributes, Node, NodeViewProps } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer, useCurrentEditor } from "@tiptap/react";
 import { Trash2Icon } from "lucide-react";
 import { useEffect } from "react";
-import styles from "../editor/editor.module.css";
-import { IconButton } from "../ui/icon-button";
+import styles from "../styles/editor.module.css";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {

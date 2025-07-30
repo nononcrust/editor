@@ -13,9 +13,9 @@ import {
   UnderlineIcon,
 } from "lucide-react";
 import { useRef } from "react";
-import { IconButton } from "../ui/icon-button";
-import { Popover } from "../ui/popover";
-import { ToolbarContextProvider, useToolbar } from "./use-toolbar";
+import { IconButton } from "../../../components/ui/icon-button";
+import { Popover } from "../../../components/ui/popover";
+import { ToolbarContextProvider, useToolbar } from "../hooks/use-toolbar";
 
 const MAX_TEXT_LENGTH = 1000;
 const COLOR_PRESETS = ["#000000", "#3b82f6", "#34d399", "#f87171", "#fbbf24", "#818cf8"] as const;
