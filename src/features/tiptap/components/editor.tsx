@@ -12,6 +12,7 @@ export type EditorValue = JSONContent;
 const defaultExtensions = [
   StarterKit.configure({
     gapcursor: false,
+    dropcursor: false,
     link: {
       autolink: false,
       HTMLAttributes: {
